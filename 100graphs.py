@@ -115,9 +115,9 @@ def plotsomethingnew(plot_number=0, sources=list()):
     foo.xaxis.axis_label_text_font_size = '8pt'
     foo.xaxis.major_label_orientation = 0.785  # Pi/4
     foo.xaxis[0].formatter = DatetimeTickFormatter(formats=formats)
+    # foo.responsive=True
     # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
     return foo
-
 
 output_file("dota_charts.html", title="Выбор героев по времени")
 
