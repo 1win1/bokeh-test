@@ -119,7 +119,7 @@ def plotsomethingnew(plot_number=0, sources=list()):
     return foo
 
 
-output_file("legend.html", title="legend.py example")
+output_file("dota_charts.html", title="Выбор героев по времени")
 
 plots = []
 plots_row = []
