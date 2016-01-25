@@ -33,21 +33,6 @@ list_players_indexes = [list_players[x].keys() for x in range(0, len(list_player
 list_uniq_heroes = [dframe[dframe[1] == players[x]].set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
                     apply(lambda x: len(x.unique())) for x in range(0, len(players))]
 
-source = ColumnDataSource(
-        data=dict(
-            x=uniq_heroes_month.index,
-            y=uniq_heroes_month,
-            players=list_players,
-            dates=list_players_indexes,
-            nick=[nickname for x in range(len(uniq_heroes_month.index))],
-            desc=[uniq_heroes_month[x] for x in range(len(uniq_heroes_month.index))],
-            time=[uniq_heroes_month.keys()[x].strftime('%m-%Y') for x in range(len(uniq_heroes_month.index))],
-            dframe=dframe[0].unique(),
-            list_uniq_heroes=list_uniq_heroes,
-            since=[list_players[0].keys()[0].strftime('%m-%Y') for x in range(len(uniq_heroes_month.index))],
-            first_games=[list_players[x].keys()[0].strftime('%m-%Y') for x in range(0, len(players))],
-        )
-    )
 
 hover = HoverTool(
         tooltips=[
