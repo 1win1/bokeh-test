@@ -2,6 +2,7 @@ import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
 from bokeh.models import HoverTool, DatetimeTickFormatter
 
+
 # Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/top100.xlsx', header=None)
 # dframe = xlsfile.parse(header=None)
@@ -15,25 +16,42 @@ players = dframe[1].unique()
 # print(len(players))
 
 # Отбираем игры конкретного игрока, для примера
-rand_counter = 0
-player_match = dframe[dframe[1] == players[rand_counter]]
-nickname = dframe[0][rand_counter]
-
-# Получаем список героев по месяцам:
-# uniq_heroes_names_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].unique()
+# rand_counter = 0
+# player_match = dframe[dframe[1] == players[rand_counter]]
+# nickname = dframe[0][rand_counter]
 
 # Получаем количество уникальных героев по месяцам: (объект pandas.core.series.Series)
-uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].apply(lambda x: len(x.unique()))
+# uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].apply(lambda x: len(x.unique()))
+# uniq_heroes_hundreds = player_match.set_index('Datetime').groupby({x: x // 100 for x in range(len(player_match.set_index('Datetime')))})[4].apply(lambda x: len(x.unique()))
 
+list_players = []
+for x in range(len(dframe[0].unique())):
+    player_dframe = dframe[dframe[1] == players[x]]
 
-# TODO: Оставить либо list_players либо list_uniq_heroes
-list_players = [dframe[dframe[1] == players[x]].set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
-                apply(lambda x: len(x.unique())) for x in range(0, len(players))]
-list_players_indexes = [list_players[x].keys() for x in range(0, len(list_players))]
+    # Отсортируем значения
+    player_dframe = player_dframe.sort_values(by='Datetime')
 
-list_uniq_heroes = [dframe[dframe[1] == players[x]].set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
-                    apply(lambda x: len(x.unique())) for x in range(0, len(players))]
+    # Добавим счётчик всех матчей этого игрока
+    player_dframe['Сounter'] = [x for x in range(len(player_dframe))]
 
+    # Создаём индекс для группировки
+    # TODO: Сделать это красиво и в одну строчку:
+    groupper = [item for sublist in [[x for y in range(100)] for x in range(len(player_dframe) // 100)]
+                for item in sublist]
+    groupper += [groupper[-1]+1 for x in range(len(player_dframe) - len(groupper))]
+
+    # Добавляем в конец столбец с индексом для группировки (индекс 33, можно добавить название столбца)
+    # (от SettingWithCopyWarning можно избавиться, установив df.is_copy = True, но я не уверен, что это лучший путь)
+    player_dframe[len(player_dframe.columns)+1] = groupper
+
+    # Добавляем запись в список
+    list_players.append(player_dframe)
+
+# Данные для оси y
+list_unique_heroes = [list_players[x].set_index('Datetime').groupby(33)[4].apply(lambda x: len(x.unique()))
+                      for x in range(len(players))]
+# Данные для оси x
+list_unique_heroes_indexes = list([list_players[x][33].unique() for x in range(0, len(list_players))])
 
 hover = HoverTool(
         tooltips=[
@@ -44,9 +62,7 @@ hover = HoverTool(
             ("Playing since:", "@since"),
         ]
     )
-
 # Рисуем графики:
-output_file("dota_charts_new.html", title="Выбор героев по времени")
 TOOLS = "pan, wheel_zoom, box_zoom, reset,save, box_select, crosshair"
 
 
@@ -56,54 +72,40 @@ def plotsomethingnew(plot_number=0, sources=list()):
         sources = []
 
     foo_nickname = []
-    foo_datetime = []
-    foo_fgames = []
-    for i in range(0, len(list_players_indexes[plot_number])):
+    for i in range(0, len(list_unique_heroes[plot_number])):
         foo_nickname.append(dframe[0].unique()[plot_number])
-        foo_datetime.append(list_players_indexes[plot_number][i].strftime('%m-%Y'))
-        foo_fgames.append([list_players[plot_number].keys()[0].strftime('%m-%Y')])
 
     new_source = ColumnDataSource(
         data=dict(
-            x=list_players_indexes[plot_number],  # pandas.tseries.index.DatetimeIndex
-            y=list_players[plot_number],  # pandas.core.series.Series
-            time=foo_datetime,
+            x=list_unique_heroes_indexes[plot_number], #list(pandas.core.series.Series)
+            y=list_unique_heroes[plot_number],  # pandas.core.series.Series
             nick=foo_nickname,
-            unique_heroes=list_uniq_heroes[plot_number],
-            playing_since=foo_fgames,
+            unique_heroes=list_unique_heroes[plot_number],
         )
     )
 
     foo_hover = HoverTool(
             tooltips=[
                 ("Index", "$index"),
-                ("Date", "@time"),
                 ("Nick:", "@nick"),
                 ("Unique heroes:", "@unique_heroes"),
-                ("Playing since:", "@playing_since"),
+                # ("Playing since:", "@playing_since"),
             ]
         )
-
     sources.append(new_source)
 
-
-# Необходимые форматы для разных масштабов можно задать вучную, перечислив их в словаре:
-    formats = {
-        'hours': ["%b"],
-        'days': ["%b-%y"],
-    }
-
     # Создаём график:
-    foo = figure(width=275, height=300, name="foo", x_axis_type="datetime",
+    foo = figure(width=275, height=300, name="foo",
                  title=(str(plot_number) + ' ' + str(foo_nickname[0])), tools=[foo_hover, TOOLS])
     foo.line('x', 'y', source=new_source)
     foo.title_text_font_size = '8pt'
     foo.xaxis.axis_label_text_font_size = '8pt'
     foo.xaxis.major_label_orientation = 0.785  # Pi/4
-    foo.xaxis[0].formatter = DatetimeTickFormatter(formats=formats)
     # foo.responsive=True
     # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
     return foo
+
+output_file("dota_charts_hundreds.html", title="Выбор героев по времени")
 
 plots = []
 plots_row = []
@@ -117,6 +119,7 @@ for x in range(0, (len(players) // 5)):
         plots_row.append(plotsomethingnew(plot_num))
         plot_num += 1
     plots_row = []
+
 
 grid_layout = gridplot(plots)
 show(grid_layout)
