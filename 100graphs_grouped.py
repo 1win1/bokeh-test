@@ -1,7 +1,6 @@
 import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
-from bokeh.models import HoverTool, DatetimeTickFormatter
-
+from bokeh.models import HoverTool
 
 # Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/top100.xlsx', header=None)
@@ -21,8 +20,8 @@ players = dframe[1].unique()
 # nickname = dframe[0][rand_counter]
 
 # Получаем количество уникальных героев по месяцам: (объект pandas.core.series.Series)
-# uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].apply(lambda x: len(x.unique()))
-# uniq_heroes_hundreds = player_match.set_index('Datetime').groupby({x: x // 100 for x in range(len(player_match.set_index('Datetime')))})[4].apply(lambda x: len(x.unique()))
+# uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
+# apply(lambda x: len(x.unique()))
 
 list_players = []
 for x in range(len(dframe[0].unique())):
@@ -53,15 +52,6 @@ list_unique_heroes = [list_players[x].set_index('Datetime').groupby(33)[4].apply
 # Данные для оси x
 list_unique_heroes_indexes = list([list_players[x][33].unique() for x in range(0, len(list_players))])
 
-hover = HoverTool(
-        tooltips=[
-            ("Index", "$index"),
-            ("Date", "@time"),
-            ("Nick:", "@nick"),
-            ("Unique heroes:", "@desc"),
-            ("Playing since:", "@since"),
-        ]
-    )
 # Рисуем графики:
 TOOLS = "pan, wheel_zoom, box_zoom, reset,save, box_select, crosshair"
 
@@ -105,7 +95,8 @@ def plotsomethingnew(plot_number=0, sources=list()):
     # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
     return foo
 
-output_file("dota_charts_hundreds.html", title="Выбор героев по времени")
+# Задаём выходной файл:
+output_file("dota_charts_hundreds.html", title="Выбор героев по сотням матчей")
 
 plots = []
 plots_row = []
