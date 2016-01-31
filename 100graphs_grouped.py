@@ -9,22 +9,19 @@ from bokeh.models import HoverTool
 
 # Ускоряем загрузку скрипта с помощью преварительно сохранённого в файл DataFrame
 # Сохранять с помощью dframe.to_pickle('data/dframe')
-dframe = pd.read_pickle('data/dframe')
+dframe = pd.read_pickle('data/dframe29-01-16')
+# dframe = pd.read_pickle('data/dframe')
 
 players = dframe[1].unique()
 # print(len(players))
-
-# Отбираем игры конкретного игрока, для примера
-# rand_counter = 0
-# player_match = dframe[dframe[1] == players[rand_counter]]
-# nickname = dframe[0][rand_counter]
 
 # Получаем количество уникальных героев по месяцам: (объект pandas.core.series.Series)
 # uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
 # apply(lambda x: len(x.unique()))
 
 list_players = []
-for x in range(len(dframe[0].unique())):
+# Считаем уникальными ID, а не никнеймы, так как может получиться, что ник поменяли в процессе парсинга данных
+for x in range(len(dframe[1].unique())):
     player_dframe = dframe[dframe[1] == players[x]]
 
     # Отсортируем значения
@@ -35,14 +32,19 @@ for x in range(len(dframe[0].unique())):
 
     # Создаём индекс для группировки
     # TODO: Сделать это красиво и в одну строчку:
-    groupper = [item for sublist in [[x for y in range(100)] for x in range(len(player_dframe) // 100)]
+    if len(player_dframe) > 100:
+        groupper = [item for sublist in [[x for y in range(100)] for x in range(len(player_dframe) // 100)]
                 for item in sublist]
-    groupper += [groupper[-1]+1 for x in range(len(player_dframe) - len(groupper))]
+        groupper += [groupper[-1] + 1 for x in range(len(player_dframe) - len(groupper))]
+    else:
+        groupper = [item for sublist in [[x for y in range(len(player_dframe))] for x in range(1)]
+                for item in sublist]
+        groupper += [groupper[-1] + 1 for x in range(len(player_dframe) - len(groupper))]
+    print(x, len(groupper), len(player_dframe), len(player_dframe))
 
     # Добавляем в конец столбец с индексом для группировки (индекс 33, можно добавить название столбца)
     # (от SettingWithCopyWarning можно избавиться, установив df.is_copy = True, но я не уверен, что это лучший путь)
     player_dframe[len(player_dframe.columns)+1] = groupper
-
     # Добавляем запись в список
     list_players.append(player_dframe)
 
@@ -67,7 +69,7 @@ def plotsomethingnew(plot_number=0, sources=list()):
 
     new_source = ColumnDataSource(
         data=dict(
-            x=list_unique_heroes_indexes[plot_number], #list(pandas.core.series.Series)
+            x=list_unique_heroes_indexes[plot_number],  # list(pandas.core.series.Series)
             y=list_unique_heroes[plot_number],  # pandas.core.series.Series
             nick=foo_nickname,
             unique_heroes=list_unique_heroes[plot_number],
@@ -106,11 +108,10 @@ plot_num = 0
 # Строим столько графиков, сколько уместится целыми рядами
 for x in range(0, (len(players) // 5)):
     plots.append(plots_row)
-    for y in range(0, 5):
+    for xi in range(0, 5):
         plots_row.append(plotsomethingnew(plot_num))
         plot_num += 1
     plots_row = []
-
 
 grid_layout = gridplot(plots)
 show(grid_layout)
