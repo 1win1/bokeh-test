@@ -11,20 +11,24 @@ graphs.py - вывод одного графика для игрока из сп
 
 
 
-Папка notebooks - содержит Ipython Notebooks для интерактивной работы
+Папка notebooks - содержит [Ipython Notebooks][2] для интерактивной работы
+Для работы с ними можно воспользоваться [Jupyter nbviewer][3]
+
 DotaCharts.ipynb - http://nbviewer.jupyter.org/github/1win1/bokeh-test/blob/master/notebooks/DotaCharts.ipynb (генерирует HTML)
 
 
-DotaParse.ipynb - # TODO: Добавить описание
+DotaParse.ipynb - http://nbviewer.jupyter.org/github/1win1/bokeh-test/blob/master/notebooks/DotaParse.ipynb (без создания HTML)
 
 
-100graphs.ipynb - http://nbviewer.jupyter.org/github/1win1/bokeh-test/blob/master/100graphs.ipynb (без HTML)
+100graphs.ipynb - http://nbviewer.jupyter.org/github/1win1/bokeh-test/blob/master/notebooks/100graphs.ipynb (без HTML)
 
 
-100graphs_grouped.ipynb - # TODO: Добавить описание
+100graphs_grouped.ipynb - http://nbviewer.jupyter.org/github/1win1/bokeh-test/blob/master/notebooks/100graphs_grouped.ipynb (без HTML)
 
 
 Папка data - содержит данные, необходимые для работы скриптов.
 
 
 [1]: http://bokeh.pydata.org/
+[2]: http://ipython.org/notebook
+[3]: http://nbviewer.jupyter.org/github/1win1/bokeh-test/tree/master/notebooks/
