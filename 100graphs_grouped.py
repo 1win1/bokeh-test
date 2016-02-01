@@ -2,6 +2,10 @@ import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
 from bokeh.models import HoverTool, FixedTicker
 
+"""Этот скрипт строит сотню графиков зависимости числа уникальных героев
+от числа проведённых игр, сгруппированных сотнями для всех игроков из dataframe.
+Результат записывается в dota_charts_hundreds.html"""
+
 # Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/allpick29-01-16.xlsx', header=None)
 # dframe = xlsfile.parse(header=None)

@@ -4,14 +4,18 @@ from bokeh.models import HoverTool, CustomJS
 from bokeh.models.widgets import Select
 from bokeh.io import vform
 
-# Open the excel file as an object
+"""Этот скрипт выводит график зависимости количества уникальных героев
+от месяца игры для одного игрока и позволяет переключаться между всеми доступными через выпадающий список.
+Результаты записвыаются как HTML страница dropdown.html"""
+
+# Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/top100.xlsx', header=None)
 # dframe = xlsfile.parse(header=None)
 # dframe = dframe.rename(columns={30: 'Datetime'})
 
 # Ускоряем загрузку скрипта с помощью преварительно сохранённого в файл DataFrame
 # Сохранять с помощью dframe.to_pickle('data/dframe')
-dframe = pd.read_pickle('data/dframe')
+dframe = pd.read_pickle('data/dframe29-01-16')
 
 players = dframe[1].unique()
 # print(len(players))
@@ -34,7 +38,6 @@ uniq_heroes_names_month = player_match.set_index('Datetime').groupby(pd.TimeGrou
 uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].apply(lambda x: len(x.unique()))
 
 # Рисуем графики:
-output_file("legend.html", title="legend.py example")
 TOOLS = "pan,wheel_zoom,box_zoom,reset,save,box_select, crosshair"
 
 list_players = [dframe[dframe[1] == players[x]].set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].apply(lambda x: len(x.unique())) for x in range(0, len(players))]
@@ -103,9 +106,12 @@ select_callback = CustomJS(args=dict(source=source), code="""
     source.trigger('change');
 """)
 
-select = Select(title="Player:", value="None", options=[str(x)+ '\t' + dframe[0].unique()[x] for x in range(0, len(players))], callback=select_callback)
+select = Select(title="Player:", value="None", options=[str(x)+ '\t' + dframe[0].unique()[x]
+                                                        for x in range(0, len(players))], callback=select_callback)
+
+# Задаём выходной файл:
+output_file("dropdown.html", title="Зависимость числа героев от месяца")
 
 layout = vform(select,  plot1)
-output_file("legend.html", title="legend.py example")
 show(layout)
 

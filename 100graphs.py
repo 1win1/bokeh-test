@@ -2,14 +2,18 @@ import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
 from bokeh.models import HoverTool, DatetimeTickFormatter
 
+"""Этот скрипт строит сотню графиков зависимости числа уникальных героев от месяца игры для всех игроков из dataframe.
+Результат записывается в dota_charts_month.html"""
+
 # Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/top100.xlsx', header=None)
 # dframe = xlsfile.parse(header=None)
 # dframe = dframe.rename(columns={30: 'Datetime'})
+# Преобразование типов: dframe["Datetime"] = dframe["Datetime"].astype(pd.datetime)
 
 # Ускоряем загрузку скрипта с помощью преварительно сохранённого в файл DataFrame
 # Сохранять с помощью dframe.to_pickle('data/dframe')
-dframe = pd.read_pickle('data/dframe')
+dframe = pd.read_pickle('data/dframe29-01-16')
 
 players = dframe[1].unique()
 # print(len(players))
@@ -46,7 +50,6 @@ hover = HoverTool(
     )
 
 # Рисуем графики:
-output_file("dota_charts_new.html", title="Выбор героев по времени")
 TOOLS = "pan, wheel_zoom, box_zoom, reset,save, box_select, crosshair"
 
 
@@ -104,6 +107,9 @@ def plotsomethingnew(plot_number=0, sources=list()):
     # foo.responsive=True
     # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
     return foo
+
+# Задаём выходной файл:
+output_file("dota_charts_month.html", title="Выбор героев по времени")
 
 plots = []
 plots_row = []
