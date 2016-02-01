@@ -1,10 +1,11 @@
 import pandas as pd
-from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
+from bokeh.plotting import figure, output_file, show
 from bokeh.models import HoverTool, FixedTicker
+from random import randint
 
-"""Этот скрипт строит сотню графиков зависимости числа уникальных героев
+"""Этот скрипт строит общий график зависимости числа уникальных героев
 от числа проведённых игр, сгруппированных сотнями для всех игроков из dataframe.
-Результат записывается в dota_charts_hundreds.html"""
+Результат записывается в dota_charts_all_in_one.html"""
 
 # Чтобы открыть Excel файл как объект:
 # xlsfile = pd.ExcelFile('data/allpick29-01-16.xlsx', header=None)
@@ -16,11 +17,6 @@ from bokeh.models import HoverTool, FixedTicker
 dframe = pd.read_pickle('data/dframe29-01-16')
 
 players = dframe[1].unique()
-# print(len(players))
-
-# Получаем количество уникальных героев по месяцам: (объект pandas.core.series.Series)
-# uniq_heroes_month = player_match.set_index('Datetime').groupby(pd.TimeGrouper('M'))[4].
-# apply(lambda x: len(x.unique()))
 
 list_players = []
 # Считаем уникальными ID, а не никнеймы, так как может получиться, что ник поменяли в процессе парсинга данных
@@ -60,69 +56,31 @@ list_unique_heroes_indexes = list([list_players[x][33].unique()*100+100 for x in
 # Рисуем графики:
 TOOLS = "pan, wheel_zoom, box_zoom, reset,save, box_select, crosshair"
 
-
-def plotsomethingnew(plot_number=0, sources=list()):
-    # Готовим данные:
-    if not isinstance(sources, list):
-        sources = []
-
-    foo_nickname = []
-    for i in range(0, len(list_unique_heroes[plot_number])):
-        foo_nickname.append(dframe[0].unique()[plot_number])
-
-    # На будущее - для шкал
-    # ticker = []
-    # for t in range(max(list_unique_heroes[0])+1):
-    #     ticker.append(t)
-
-    new_source = ColumnDataSource(
-        data=dict(
-            x=list_unique_heroes_indexes[plot_number],  # list(pandas.core.series.Series)
-            y=list_unique_heroes[plot_number],  # pandas.core.series.Series
-            nick=foo_nickname,
-            unique_heroes=list_unique_heroes[plot_number],
-        )
-    )
-
-    foo_hover = HoverTool(
-            tooltips=[
-                ("Index", "$index"),
-                ("Nick:", "@nick"),
-                ("Unique heroes:", "@unique_heroes"),
-                # ("Playing since:", "@playing_since"),
-            ]
-        )
-    sources.append(new_source)
-
-    # Создаём график:
-    foo = figure(width=275, height=300, name="foo",
-                 title=(str(plot_number) + ' ' + str(foo_nickname[0])), tools=[foo_hover, TOOLS])
-    foo.line('x', 'y', source=new_source)
-    foo.title_text_font_size = '8pt'
-    foo.xaxis.axis_label_text_font_size = '8pt'
-    foo.xaxis.major_label_orientation = 0.785  # Pi/4
-
-    # TODO: Сделать одинаковый масштаб шкалы Y
-    # foo.yaxis.ticker = FixedTicker(ticks=ticker)
-    # foo.responsive=True
-    # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
-    return foo
-
 # Задаём выходной файл:
-output_file("dota_charts_hundreds.html", title="Выбор героев по сотням матчей")
+output_file("dota_charts_all_in_one.html", title="Общий выбор героев")
 
 plots = []
 plots_row = []
 plot_num = 0
 
-# Строим таблицу и помещаем графики в ячейки
-# Строим столько графиков, сколько уместится целыми рядами
-for x in range(0, (len(players) // 5)):
-    plots.append(plots_row)
-    for xi in range(0, 5):
-        plots_row.append(plotsomethingnew(plot_num))
-        plot_num += 1
-    plots_row = []
+nicknames = []
+for x in range(len(players)):
+    nicknames.append(list(dframe[dframe[1] == dframe[1].unique()[x]][0])[-1])
 
-grid_layout = gridplot(plots)
-show(grid_layout)
+p1_hover = HoverTool(
+            tooltips=[
+                ("Index", "$index"),
+            ]
+        )
+
+p1 = figure(width=1200, height=1200, name="foo",
+                 title="All in one", tools=[p1_hover, TOOLS])
+
+
+for x in range(len(players)):
+    # player_data = dframe[dframe[1] == players[x]]
+    nickname = list(dframe[dframe[1] == dframe[1].unique()[x]][0])[-1]
+    color = (randint(0, 255), randint(0, 255), randint(0, 255))
+    p1.line(list_unique_heroes_indexes[x], list_unique_heroes[x], legend=nickname, color=color)
+show(p1)
+
