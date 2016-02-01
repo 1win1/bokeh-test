@@ -1,16 +1,15 @@
 import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource, gridplot
-from bokeh.models import HoverTool
+from bokeh.models import HoverTool, FixedTicker
 
 # Чтобы открыть Excel файл как объект:
-# xlsfile = pd.ExcelFile('data/top100.xlsx', header=None)
+# xlsfile = pd.ExcelFile('data/allpick29-01-16.xlsx', header=None)
 # dframe = xlsfile.parse(header=None)
 # dframe = dframe.rename(columns={30: 'Datetime'})
 
 # Ускоряем загрузку скрипта с помощью преварительно сохранённого в файл DataFrame
-# Сохранять с помощью dframe.to_pickle('data/dframe')
+# Сохранять с помощью dframe.to_pickle('data/dframe29-01-16')
 dframe = pd.read_pickle('data/dframe29-01-16')
-# dframe = pd.read_pickle('data/dframe')
 
 players = dframe[1].unique()
 # print(len(players))
@@ -40,7 +39,6 @@ for x in range(len(dframe[1].unique())):
         groupper = [item for sublist in [[x for y in range(len(player_dframe))] for x in range(1)]
                 for item in sublist]
         groupper += [groupper[-1] + 1 for x in range(len(player_dframe) - len(groupper))]
-    print(x, len(groupper), len(player_dframe), len(player_dframe))
 
     # Добавляем в конец столбец с индексом для группировки (индекс 33, можно добавить название столбца)
     # (от SettingWithCopyWarning можно избавиться, установив df.is_copy = True, но я не уверен, что это лучший путь)
@@ -52,7 +50,8 @@ for x in range(len(dframe[1].unique())):
 list_unique_heroes = [list_players[x].set_index('Datetime').groupby(33)[4].apply(lambda x: len(x.unique()))
                       for x in range(len(players))]
 # Данные для оси x
-list_unique_heroes_indexes = list([list_players[x][33].unique() for x in range(0, len(list_players))])
+# list_unique_heroes_indexes = list([list_players[x][33].unique() for x in range(0, len(list_players))])
+list_unique_heroes_indexes = list([list_players[x][33].unique()*100+100 for x in range(0, len(list_players))])
 
 # Рисуем графики:
 TOOLS = "pan, wheel_zoom, box_zoom, reset,save, box_select, crosshair"
@@ -66,6 +65,11 @@ def plotsomethingnew(plot_number=0, sources=list()):
     foo_nickname = []
     for i in range(0, len(list_unique_heroes[plot_number])):
         foo_nickname.append(dframe[0].unique()[plot_number])
+
+    # На будущее - для шкал
+    # ticker = []
+    # for t in range(max(list_unique_heroes[0])+1):
+    #     ticker.append(t)
 
     new_source = ColumnDataSource(
         data=dict(
@@ -93,6 +97,9 @@ def plotsomethingnew(plot_number=0, sources=list()):
     foo.title_text_font_size = '8pt'
     foo.xaxis.axis_label_text_font_size = '8pt'
     foo.xaxis.major_label_orientation = 0.785  # Pi/4
+
+    # TODO: Сделать одинаковый масштаб шкалы Y
+    # foo.yaxis.ticker = FixedTicker(ticks=ticker)
     # foo.responsive=True
     # адаптивность не работает: http://bokeh.pydata.org/en/0.10.0/docs/user_guide/styling.html#responsive-dimensions
     return foo
@@ -115,3 +122,8 @@ for x in range(0, (len(players) // 5)):
 
 grid_layout = gridplot(plots)
 show(grid_layout)
+
+
+for x in range(len(players)):
+    for each in range(len(list_unique_heroes[x])):
+        print(players[x], list_unique_heroes_indexes[x][each], list_unique_heroes[x][each])
