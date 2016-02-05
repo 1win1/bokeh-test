@@ -38,11 +38,11 @@ for x in range(len(dframe[1].unique())):
     if len(player_dframe) > 100:
         groupper = [item for sublist in [[x for y in range(100)] for x in range(len(player_dframe) // 100)]
                 for item in sublist]
-        groupper += [groupper[-1] + 1 for x in range(len(player_dframe) - len(groupper))]
+        groupper += [None for x in range(len(player_dframe) - len(groupper))]
     else:
         groupper = [item for sublist in [[x for y in range(len(player_dframe))] for x in range(1)]
                 for item in sublist]
-        groupper += [groupper[-1] + 1 for x in range(len(player_dframe) - len(groupper))]
+        groupper += [None for x in range(len(player_dframe) - len(groupper))]
 
     # Добавляем в конец столбец с индексом для группировки (индекс 33, можно добавить название столбца)
     # (от SettingWithCopyWarning можно избавиться, установив df.is_copy = True, но я не уверен, что это лучший путь)
@@ -98,6 +98,7 @@ def plotsomethingnew(plot_number=0, sources=list()):
     foo = figure(width=275, height=300, name="foo",
                  title=(str(plot_number) + ' ' + str(foo_nickname[0])), tools=[foo_hover, TOOLS])
     foo.line('x', 'y', source=new_source)
+    foo.circle('x', 'y', source=new_source)
     foo.title_text_font_size = '8pt'
     foo.xaxis.axis_label_text_font_size = '8pt'
     foo.xaxis.major_label_orientation = 0.785  # Pi/4
